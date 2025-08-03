@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 import joblib
 import pandas as pd
 
-app = Flask(_name_)
+app = Flask(__name__)
 
 # Load model and encoders
 model = joblib.load("crime_predictor_model.pkl")
@@ -54,5 +54,5 @@ def predict():
 def home():
     return "✅ Crime Prediction API is running!"
 
-if _name_ == "_main_":
-    app.run(host="0.0.0.0", port=5000)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
