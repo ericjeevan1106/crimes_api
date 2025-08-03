@@ -3,3 +3,4 @@ scikit-learn
 pandas
 joblib
 gunicorn
+flask-cors  # 👈 add this
