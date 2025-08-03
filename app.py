@@ -4,7 +4,7 @@ import pandas as pd
 
 app = Flask(__name__)
 
-# Load model and encoders
+# Load model and input encoders
 model = joblib.load("crime_predictor_model.pkl")
 input_encoders = joblib.load("input_label_encoders.pkl")
 output_encoders = joblib.load("output_label_encoders.pkl")
@@ -34,16 +34,9 @@ def predict():
         # Predict using model
         prediction = model.predict(df)[0]
 
-        # Decode each predicted label
-        decoded_output = {}
+        # No need to decode: model returns actual string labels
         output_columns = list(output_encoders.keys())
-        for i, col in enumerate(output_columns):
-            le = output_encoders[col]
-            value = int(round(prediction[i]))
-            if value >= len(le.classes_):
-                decoded_output[col] = f"Unknown ({value})"
-            else:
-                decoded_output[col] = le.inverse_transform([value])[0]
+        decoded_output = {col: prediction[i] for i, col in enumerate(output_columns)}
 
         return jsonify(decoded_output)
 
