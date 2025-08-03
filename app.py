@@ -7,7 +7,7 @@ app = Flask(__name__)
 CORS(app)  # Allow requests from external domains
 
 # 🔄 Load trained ML model
-model = joblib.load("chennai_crime_predictor.joblib")
+model = joblib.load("chennai_crime_predictor (3).joblib")
 
 # 🔮 Prediction route
 @app.route('/predict', methods=['POST'])
