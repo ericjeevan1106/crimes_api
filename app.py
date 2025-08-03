@@ -14,30 +14,41 @@ def predict():
     try:
         data = request.get_json()
 
-        # Convert to DataFrame
+        # Ensure all required fields are present
+        required_fields = ["Area_Name", "Pincode", "Latitude", "Longitude", "Zone_Name"]
+        for field in required_fields:
+            if field not in data:
+                return jsonify({"error": f"Missing required field: {field}"}), 400
+
+        # Convert input data to DataFrame
         df = pd.DataFrame([data])
 
-        # Encode input fields
+        # Encode categorical input features
         for col in ["Area_Name", "Zone_Name"]:
-            le = input_encoders[col]
-            df[col] = le.transform(df[col])
+            if col in input_encoders:
+                le = input_encoders[col]
+                if df[col].values[0] not in le.classes_:
+                    return jsonify({"error": f"Unseen label in column '{col}': {df[col].values[0]}"}), 400
+                df[col] = le.transform(df[col])
 
-        # Predict
+        # Predict using model
         prediction = model.predict(df)[0]
 
-        # Decode outputs
-        output = {}
+        # Decode each predicted label
+        decoded_output = {}
         output_columns = list(output_encoders.keys())
         for i, col in enumerate(output_columns):
-            val = prediction[i]
             le = output_encoders[col]
-            decoded = le.inverse_transform([int(round(val))])[0]
-            output[col] = decoded
+            value = int(round(prediction[i]))
+            if value >= len(le.classes_):
+                decoded_output[col] = f"Unknown ({value})"
+            else:
+                decoded_output[col] = le.inverse_transform([value])[0]
 
-        return jsonify(output)
+        return jsonify(decoded_output)
 
     except Exception as e:
-        return jsonify({"error": str(e)})
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/", methods=["GET"])
 def home():
